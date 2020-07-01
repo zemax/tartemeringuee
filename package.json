@@ -1,6 +1,6 @@
 {
 	"name": "tartemeringuee",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "Personnal tool to manage GDPR consent requests. Inspired by tarteaucitronjs, with Webpack and ES6 in mind.",
 	"main": "consent-manager.js",
 	"scripts": {
