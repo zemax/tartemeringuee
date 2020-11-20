@@ -1,4 +1,4 @@
-import ready from "mf-js/modules/dom/ready";
+import domready from "@zemax/mf-js/modules/dom/ready";
 import getTextFR from "./lang/fr";
 
 const consentUI = ( options ) => {
@@ -82,7 +82,7 @@ const consentUI = ( options ) => {
         
         // Init
         
-        ready( () => document.body.appendChild( banner ) );
+        domready( () => document.body.appendChild( banner ) );
     };
     
     /**************************************************
@@ -250,7 +250,7 @@ const consentUI = ( options ) => {
         
         // Init
         
-        ready( () => document.body.appendChild( details ) );
+        domready( () => document.body.appendChild( details ) );
     };
     
     /**************************************************
@@ -267,7 +267,7 @@ const consentUI = ( options ) => {
         }, false );
         
         if ( document.location.hash === hashtag ) {
-            ready( () => createDetails() );
+            domready( () => createDetails() );
         }
     }
     

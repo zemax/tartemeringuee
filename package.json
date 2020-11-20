@@ -21,7 +21,7 @@
 	},
 	"homepage": "https://github.com/zemax/tartemeringuee#readme",
 	"dependencies": {
-		"@babel/runtime": "^7.5.5",
-		"mf-js": "^2.0.3"
+		"@babel/runtime": "^7.12.5",
+		"@zemax/mf-js": "^3.0.0"
 	}
 }
