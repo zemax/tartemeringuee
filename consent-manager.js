@@ -1,4 +1,4 @@
-import cookie from "mf-js/modules/cookies/cookie";
+import cookie from "@zemax/mf-js/modules/cookies/cookie";
 
 const consentManager = ( options = {} ) => {
     const { cookieName } = Object.assign( { 'cookieName': 'tarteaucitron' }, options );
