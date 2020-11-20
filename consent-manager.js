@@ -52,7 +52,10 @@ const consentManager = ( options = {} ) => {
         
         service.init( manager );
         
-        if ( status === STATUS_FALSE ) {
+        if ( !!service.required ) {
+            service.accept( manager );
+        }
+        else if ( status === STATUS_FALSE ) {
             service.refuse();
         }
         else if ( status === STATUS_TRUE ) {
@@ -73,6 +76,8 @@ const consentManager = ( options = {} ) => {
             services[ key ].forEach( ( service ) => service.accept( manager ) );
             writeCookie();
         }
+        
+        return manager;
     };
     
     const deny = ( key ) => {
@@ -92,6 +97,8 @@ const consentManager = ( options = {} ) => {
             
             domain.shift();
         }
+        
+        return manager;
     };
     
     const acceptAll = () => servicesList.forEach( ( key ) => accept( key ) );
@@ -135,7 +142,7 @@ const consentManager = ( options = {} ) => {
         deny,
         acceptAll,
         denyAll,
-		services: () => servicesList.map( ( key ) => ({ key, service: services[ key ], status: servicesStatus[ key ] }) )
+        services: () => servicesList.map( ( key ) => ({ key, service: services[ key ], status: servicesStatus[ key ] }) )
     };
     
     return manager;

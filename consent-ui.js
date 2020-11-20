@@ -1,7 +1,7 @@
 import domready from "@zemax/mf-js/modules/dom/ready";
 import getTextFR from "./lang/fr";
 
-const consentUI = ( options ) => {
+export const consentUI = ( options ) => {
     const { hashtag, getText } = Object.assign(
         {
             'hashtag': '#cookies-consent',
@@ -125,10 +125,11 @@ const consentUI = ( options ) => {
         detailsText.innerHTML = getText( 'details' );
         
         const createItem = ( options ) => {
-            const { status, label, accept, deny } = options;
+            const { required, status, label, accept, deny } = options;
             
             const item     = document.createElement( 'div' );
             item.className = 'consent-ui--item';
+            item.setAttribute( 'data-required', required ? 'true' : 'false' );
             item.setAttribute( 'data-status', status );
             
             // Label
@@ -144,37 +145,45 @@ const consentUI = ( options ) => {
             itemChoices.className = 'consent-ui--item-choices';
             item.appendChild( itemChoices );
             
-            // Accept
-            
-            const itemAccept     = document.createElement( 'div' );
-            itemAccept.className = 'consent-ui--item-accept';
-            itemChoices.appendChild( itemAccept );
-            
-            const acceptButton     = document.createElement( 'button' );
-            acceptButton.type      = 'button';
-            acceptButton.innerHTML = getText( 'accept' );
-            itemAccept.appendChild( acceptButton );
-            
-            acceptButton.addEventListener( 'click', () => {
-                item.setAttribute( 'data-status', STATUS_TRUE );
-                accept();
-            } );
-            
-            // Deny
-            
-            const itemDeny     = document.createElement( 'div' );
-            itemDeny.className = 'consent-ui--item-deny';
-            itemChoices.appendChild( itemDeny );
-            
-            const denyButton     = document.createElement( 'button' );
-            denyButton.type      = 'button';
-            denyButton.innerHTML = getText( 'deny' );
-            itemDeny.appendChild( denyButton );
-            
-            denyButton.addEventListener( 'click', () => {
-                item.setAttribute( 'data-status', STATUS_FALSE );
-                deny();
-            } );
+            if ( required ) {
+                const itemRequired     = document.createElement( 'div' );
+                itemRequired.className = 'consent-ui--item-required';
+                itemRequired.innerHTML = getText( 'required' );
+                itemChoices.appendChild( itemRequired );
+            }
+            else {
+                // Accept
+                
+                const itemAccept     = document.createElement( 'div' );
+                itemAccept.className = 'consent-ui--item-accept';
+                itemChoices.appendChild( itemAccept );
+                
+                const acceptButton     = document.createElement( 'button' );
+                acceptButton.type      = 'button';
+                acceptButton.innerHTML = getText( 'accept' );
+                itemAccept.appendChild( acceptButton );
+                
+                acceptButton.addEventListener( 'click', () => {
+                    item.setAttribute( 'data-status', STATUS_TRUE );
+                    accept();
+                } );
+                
+                // Deny
+                
+                const itemDeny     = document.createElement( 'div' );
+                itemDeny.className = 'consent-ui--item-deny';
+                itemChoices.appendChild( itemDeny );
+                
+                const denyButton     = document.createElement( 'button' );
+                denyButton.type      = 'button';
+                denyButton.innerHTML = getText( 'deny' );
+                itemDeny.appendChild( denyButton );
+                
+                denyButton.addEventListener( 'click', () => {
+                    item.setAttribute( 'data-status', STATUS_FALSE );
+                    deny();
+                } );
+            }
             
             return item;
         };
@@ -188,7 +197,8 @@ const consentUI = ( options ) => {
         detailsModal.appendChild( detailsAll );
         
         detailsAll.appendChild( createItem( {
-                                                'status': services.reduce( ( status, item ) => {
+                                                'required': false,
+                                                'status':   services.reduce( ( status, item ) => {
                                                     console.log( item );
                 
                                                     switch ( item.status ) {
@@ -208,12 +218,12 @@ const consentUI = ( options ) => {
                                                             return STATUS_WAIT;
                                                     }
                                                 }, '' ),
-                                                'label':  getText( 'allServices' ),
-                                                'accept': () => {
+                                                'label':    getText( 'allServices' ),
+                                                'accept':   () => {
                                                     manager.acceptAll();
                                                     closeDetails();
                                                 },
-                                                'deny':   () => manager.denyAll(),
+                                                'deny':     () => manager.denyAll(),
                                             } ) );
         
         // Items
@@ -223,11 +233,12 @@ const consentUI = ( options ) => {
         detailsModal.appendChild( detailsItems );
         
         services.forEach( ( item ) => detailsItems.appendChild( createItem( {
-                                                                                'status': item.status,
-                                                                                'label':  item.service[ 0 ].name
-                                                                                          + (!!item.service[ 0 ].uri ? `<a href="${item.service[ 0 ].uri}" target="_blank">${getText( 'policyLinkLabel' )}</a>` : ''),
-                                                                                'accept': () => manager.accept( item.key ),
-                                                                                'deny':   () => manager.deny( item.key ),
+                                                                                'required': !!item.service[ 0 ].required,
+                                                                                'status':   item.status,
+                                                                                'label':    item.service[ 0 ].name
+                                                                                            + (!!item.service[ 0 ].uri ? `<a href="${item.service[ 0 ].uri}" target="_blank">${getText( 'policyLinkLabel' )}</a>` : ''),
+                                                                                'accept':   () => manager.accept( item.key ),
+                                                                                'deny':     () => manager.deny( item.key ),
                                                                             } ) ) );
         
         // Details close
