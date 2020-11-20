@@ -1,6 +1,6 @@
 import addScript from "../utils/addscript";
 
-const service = ( UA, configOptions = { 'anonymize_ip': true }, gtagMore = () => true ) => ({
+export const gtagService = ( UA, configOptions = { 'anonymize_ip': true }, more = () => true ) => ({
     'key':     'gtag',
     'type':    'analytic',
     'name':    'Google Analytics (gtag.js)',
@@ -15,10 +15,11 @@ const service = ( UA, configOptions = { 'anonymize_ip': true }, gtagMore = () =>
         
         gtag( 'js', new Date() );
         gtag( 'config', UA, configOptions );
-        gtagMore();
+        
+        more();
     },
     'accept':  () => addScript( 'https://www.googletagmanager.com/gtag/js?id=' + UA ),
     'refuse':  () => true,
 });
 
-export default service;
+export default gtagService;
