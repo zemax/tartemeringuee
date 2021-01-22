@@ -138,11 +138,15 @@
 		flex-grow: 1;
 
 		a {
-			display:   block;
-			font-size: .7em;
-			color:     inherit;
-			opacity:   .8;
+			color: inherit;
 		}
+	}
+
+	&--item-description,
+	&--item-policy {
+		margin:    0;
+		font-size: .7em;
+		opacity:   .8;
 	}
 
 	&--item-choices {

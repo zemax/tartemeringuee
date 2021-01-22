@@ -1,12 +1,10 @@
 import domready from "@zemax/mf-js/modules/dom/ready";
 import getTextFR from "./lang/fr";
+import Observable from "@zemax/mf-js/modules/core/observable";
 
 export const consentUI = ( options ) => {
-    const { hashtag, getText } = Object.assign(
-        {
-            'hashtag': '#cookies-consent',
-            'getText': getTextFR( options ),
-        }, options );
+    const hashtag = options.hashtag || '#cookies-consent';
+    const getText = options.getText || getTextFR( options );
     
     const STATUS_WAIT  = 'wait';
     const STATUS_TRUE  = 'true';
@@ -19,6 +17,12 @@ export const consentUI = ( options ) => {
     let manager = false;
     
     const setManager = ( m ) => manager = m;
+    
+    /**************************************************
+     * EVENT DISPATCHER
+     **************************************************/
+    
+    const consentUIObservable = Object.assign( {}, Observable );
     
     /**************************************************
      * BANNER
@@ -82,7 +86,10 @@ export const consentUI = ( options ) => {
         
         // Init
         
-        domready( () => document.body.appendChild( banner ) );
+        domready( () => {
+            document.body.appendChild( banner );
+            consentUIObservable.trigger( { type: 'createBanner' } );
+        } );
     };
     
     /**************************************************
@@ -125,6 +132,8 @@ export const consentUI = ( options ) => {
         detailsText.innerHTML = getText( 'details' );
         
         const createItem = ( options ) => {
+            console.log( 'ui createItem', options );
+            
             const { required, status, label, accept, deny } = options;
             
             const item     = document.createElement( 'div' );
@@ -138,6 +147,20 @@ export const consentUI = ( options ) => {
             itemLabel.className = 'consent-ui--item-label';
             itemLabel.innerHTML = label;
             item.appendChild( itemLabel );
+            
+            if ( !!options.description ) {
+                const itemDescription     = document.createElement( 'p' );
+                itemDescription.className = 'consent-ui--item-description';
+                itemDescription.innerHTML = options.description;
+                itemLabel.appendChild( itemDescription );
+            }
+            
+            if ( !!options.uri ) {
+                const itemPolicyLink     = document.createElement( 'p' );
+                itemPolicyLink.className = 'consent-ui--item-policy';
+                itemPolicyLink.innerHTML = `<a href="${options.uri}" target="_blank">${getText( 'policyLinkLabel' )}</a>`;
+                itemLabel.appendChild( itemPolicyLink );
+            }
             
             // Choices
             
@@ -233,12 +256,13 @@ export const consentUI = ( options ) => {
         detailsModal.appendChild( detailsItems );
         
         services.forEach( ( item ) => detailsItems.appendChild( createItem( {
-                                                                                'required': !!item.service[ 0 ].required,
-                                                                                'status':   item.status,
-                                                                                'label':    item.service[ 0 ].name
-                                                                                            + (!!item.service[ 0 ].uri ? `<a href="${item.service[ 0 ].uri}" target="_blank">${getText( 'policyLinkLabel' )}</a>` : ''),
-                                                                                'accept':   () => manager.accept( item.key ),
-                                                                                'deny':     () => manager.deny( item.key ),
+                                                                                'required':    !!item.service[ 0 ].required || !!item.service[ 0 ].mandatory,
+                                                                                'status':      item.status,
+                                                                                'label':       item.service[ 0 ].name,
+                                                                                'description': (!!item.service[ 0 ].description) ? item.service[ 0 ].description : false,
+                                                                                'uri':         (!!item.service[ 0 ].uri) ? item.service[ 0 ].uri : false,
+                                                                                'accept':      () => manager.accept( item.key ),
+                                                                                'deny':        () => manager.deny( item.key ),
                                                                             } ) ) );
         
         // Details close
@@ -261,7 +285,10 @@ export const consentUI = ( options ) => {
         
         // Init
         
-        domready( () => document.body.appendChild( details ) );
+        domready( () => {
+            document.body.appendChild( details );
+            consentUIObservable.trigger( { type: 'createDetails' } );
+        } );
     };
     
     /**************************************************
@@ -285,6 +312,7 @@ export const consentUI = ( options ) => {
     const o = {
         setManager,
         requireConsent,
+        consentUIObservable: consentUIObservable,
     };
     
     return o;
