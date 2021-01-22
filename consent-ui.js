@@ -134,11 +134,11 @@ export const consentUI = ( options ) => {
         const createItem = ( options ) => {
             console.log( 'ui createItem', options );
             
-            const { required, status, label, accept, deny } = options;
+            const { mandatory, status, label, accept, deny } = options;
             
             const item     = document.createElement( 'div' );
             item.className = 'consent-ui--item';
-            item.setAttribute( 'data-required', required ? 'true' : 'false' );
+            item.setAttribute( 'data-mandatory', mandatory ? 'true' : 'false' );
             item.setAttribute( 'data-status', status );
             
             // Label
@@ -168,11 +168,11 @@ export const consentUI = ( options ) => {
             itemChoices.className = 'consent-ui--item-choices';
             item.appendChild( itemChoices );
             
-            if ( required ) {
-                const itemRequired     = document.createElement( 'div' );
-                itemRequired.className = 'consent-ui--item-required';
-                itemRequired.innerHTML = getText( 'required' );
-                itemChoices.appendChild( itemRequired );
+            if ( mandatory ) {
+                const itemMandatory     = document.createElement( 'div' );
+                itemMandatory.className = 'consent-ui--item-mandatory';
+                itemMandatory.innerHTML = getText( 'mandatory' );
+                itemChoices.appendChild( itemMandatory );
             }
             else {
                 // Accept
@@ -220,8 +220,8 @@ export const consentUI = ( options ) => {
         detailsModal.appendChild( detailsAll );
         
         detailsAll.appendChild( createItem( {
-                                                'required': false,
-                                                'status':   services.reduce( ( status, item ) => {
+                                                'mandatory': false,
+                                                'status':    services.reduce( ( status, item ) => {
                                                     console.log( item );
                 
                                                     switch ( item.status ) {
@@ -241,12 +241,12 @@ export const consentUI = ( options ) => {
                                                             return STATUS_WAIT;
                                                     }
                                                 }, '' ),
-                                                'label':    getText( 'allServices' ),
-                                                'accept':   () => {
+                                                'label':     getText( 'allServices' ),
+                                                'accept':    () => {
                                                     manager.acceptAll();
                                                     closeDetails();
                                                 },
-                                                'deny':     () => manager.denyAll(),
+                                                'deny':      () => manager.denyAll(),
                                             } ) );
         
         // Items
@@ -256,7 +256,7 @@ export const consentUI = ( options ) => {
         detailsModal.appendChild( detailsItems );
         
         services.forEach( ( item ) => detailsItems.appendChild( createItem( {
-                                                                                'required':    !!item.service[ 0 ].required || !!item.service[ 0 ].mandatory,
+                                                                                'mandatory':   !!item.service[ 0 ].mandatory,
                                                                                 'status':      item.status,
                                                                                 'label':       item.service[ 0 ].name,
                                                                                 'description': (!!item.service[ 0 ].description) ? item.service[ 0 ].description : false,

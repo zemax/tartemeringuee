@@ -1,7 +1,11 @@
 import cookie from "@zemax/mf-js/modules/cookies/cookie";
 
 const consentManager = ( options = {} ) => {
-    const { cookieName } = Object.assign( { 'cookieName': 'tarteaucitron' }, options );
+    const cookieName           = options.cookieName || 'tarteaucitron'
+    const showMandatoryWaiting = !!options.showMandatoryWaiting;
+    
+    console.log( 'ConsentManager', 'cookieName', cookieName );
+    console.log( 'ConsentManager', 'showMandatoryWaiting', showMandatoryWaiting );
     
     const STATUS_WAIT  = 'wait';
     const STATUS_TRUE  = 'true';
@@ -36,12 +40,17 @@ const consentManager = ( options = {} ) => {
      * SERVICES
      **************************************************/
     
-    const services        = {};
-    const servicesList    = [];
-    const servicesWaiting = [];
+    const services                 = {};
+    const servicesList             = [];
+    const servicesWaiting          = [];
+    const servicesWaitingMandatory = [];
     
     const register = ( service, key = false ) => {
         key = key || service.key;
+        
+        service.mandatory = !!service.mandatory
+                            || !!service.required
+                            || ((typeof service.needConsent !== 'undefined') && !service.needConsent);
         
         const status = servicesStatus[ key ] = (servicesStatus[ key ] || STATUS_WAIT);
         
@@ -52,8 +61,12 @@ const consentManager = ( options = {} ) => {
         
         service.init( manager );
         
-        if ( !!service.required ) {
+        if ( service.mandatory ) {
             service.accept( manager );
+            
+            if ( status === STATUS_WAIT ) {
+                servicesWaitingMandatory.push( service );
+            }
         }
         else if ( status === STATUS_FALSE ) {
             service.refuse();
@@ -91,7 +104,11 @@ const consentManager = ( options = {} ) => {
             const d = domain.join( '.' );
             
             services[ key ].forEach( ( service ) => service.cookies.forEach( ( cookieName ) => {
-                cookie( cookieName, null, { 'path': '/', 'expires': -1, 'domain': '.' + d } );
+                cookie( cookieName, null, {
+                    'path':    '/',
+                    'expires': -1,
+                    'domain':  '.' + d
+                } );
                 cookie( cookieName, null, { 'path': '/', 'expires': -1, 'domain': d } );
             } ) );
             
@@ -127,8 +144,11 @@ const consentManager = ( options = {} ) => {
         
         writeCookie();
         
-        if ( consentUI && servicesWaiting.length > 0 ) {
-            consentUI.requireConsent();
+        if ( consentUI ) {
+            if ( (servicesWaiting.length > 0)
+                 || (showMandatoryWaiting && (servicesWaitingMandatory.length > 0)) ) {
+                consentUI.requireConsent();
+            }
         }
         
         return manager;
@@ -142,7 +162,11 @@ const consentManager = ( options = {} ) => {
         deny,
         acceptAll,
         denyAll,
-        services: () => servicesList.map( ( key ) => ({ key, service: services[ key ], status: servicesStatus[ key ] }) )
+        services: () => servicesList.map( ( key ) => ({
+            key,
+            service: services[ key ],
+            status:  servicesStatus[ key ]
+        }) )
     };
     
     return manager;
