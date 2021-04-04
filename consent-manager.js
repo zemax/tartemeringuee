@@ -2,6 +2,7 @@ import cookie from "@zemax/mf-js/modules/cookies/cookie";
 
 const consentManager = ( options = {} ) => {
     const cookieName           = options.cookieName || 'tarteaucitron'
+    const cookieExpires        = options.cookieExpires || 365
     const showMandatoryWaiting = !!options.showMandatoryWaiting;
     
     console.log( 'ConsentManager', 'cookieName', cookieName );
@@ -33,7 +34,7 @@ const consentManager = ( options = {} ) => {
     const writeCookie = () => cookie(
         cookieName,
         servicesList.reduce( ( curry, key ) => curry + '!' + key + '=' + servicesStatus[ key ], '' ),
-        { expires: 365, path: '/' }
+        { expires: cookieExpires, path: '/' }
     );
     
     /**************************************************
