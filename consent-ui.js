@@ -63,6 +63,17 @@ export const consentUI = ( options ) => {
             closeBanner();
         } );
         
+        const denyAllButton     = document.createElement( 'button' );
+        denyAllButton.className = 'deny';
+        denyAllButton.type      = 'button';
+        denyAllButton.innerHTML = getText( 'deny' );
+        bannerActions.appendChild( denyAllButton );
+        
+        denyAllButton.addEventListener( 'click', () => {
+            manager.denyAll();
+            closeBanner();
+        } );
+        
         const detailsButton     = document.createElement( 'button' );
         detailsButton.className = 'details';
         detailsButton.type      = 'button';
